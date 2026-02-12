@@ -37,7 +37,7 @@ a {
 }
 
 .logo {
-    max-width: 36px;
+    max-width: 70px;
     height: auto;
 }
 
@@ -211,28 +211,125 @@ a {
 
 .brand-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 70px;
 }
 
 .brand-grid-page {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
+.brand-carousel {
+    position: relative;
+}
+
+.brand-carousel-single {
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.brand-marquee {
+    overflow: hidden;
+    position: relative;
+    padding: 10px 0 20px;
+}
+
+.brand-track {
+    display: flex;
+    gap: 18px;
+    width: max-content;
+    animation: brand-scroll 36s linear infinite;
+}
+
+.brand-marquee:hover .brand-track {
+    animation-play-state: paused;
+}
+
+.brand-carousel .carousel-inner {
+    padding: 10px 0 30px;
+}
+
+.brand-carousel-single .carousel-inner {
+    padding: 10px 0 10px;
+}
+
+.brand-carousel-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.brand-slide {
+    min-height: 200px;
+    min-width: auto;
+    padding: 18px;
+    margin: 0 auto;
+}
+
+@keyframes brand-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.brand-carousel .carousel-control-prev,
+.brand-carousel .carousel-control-next {
+    width: 15%;
+}
+
+.brand-carousel .carousel-control-prev-icon,
+.brand-carousel .carousel-control-next-icon {
+    filter: invert(1) grayscale(1);
+}
+
 .brand-tile {
     background: var(--bg);
     border-radius: 14px;
-    padding: 18px;
+    padding: 12px;
     text-align: center;
     font-weight: 600;
     color: var(--muted);
     border: 1px dashed rgba(15, 23, 42, 0.15);
     transition: transform 0.2s ease, border 0.2s ease;
+    min-height: 180px;
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .brand-tile:hover {
     transform: translateY(-3px);
     border-color: rgba(10, 79, 149, 0.4);
+}
+
+.brand-tile img {
+    width: clamp(130px, 12vw, 160px);
+    height: clamp(60px, 5vw, 80px);
+    object-fit: contain;
+    filter: saturate(0.9);
+}
+
+.brand-tile img.brand-logo-lg {
+    width: clamp(150px, 14vw, 185px);
+    height: clamp(70px, 6vw, 90px);
+}
+
+@media (max-width: 991px) {
+    .brand-carousel-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575px) {
+    .brand-carousel-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-tile {
+        min-width: auto;
+    }
 }
 
 .btn-primary {
@@ -323,6 +420,58 @@ a {
 
 .form-card {
     background: var(--white);
+}
+
+.contact-form .form-label {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.contact-form .form-control,
+.contact-form .form-select {
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: #f8fafc;
+    padding: 12px 14px;
+}
+
+.contact-form .form-control:focus,
+.contact-form .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.2rem rgba(25, 179, 177, 0.18);
+    background: var(--white);
+}
+
+.form-note {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.contact-map {
+    min-height: 210px;
+}
+
+.contact-info {
+    display: grid;
+    gap: 12px;
+}
+
+.contact-item {
+    display: grid;
+    gap: 4px;
+}
+
+.contact-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+}
+
+.contact-value {
+    font-weight: 600;
+    color: var(--primary-dark);
 }
 
 .footer {
