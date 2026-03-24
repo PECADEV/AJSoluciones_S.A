@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario A J Soluciones S.A.</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --accent: #7c3aed;
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --surface2: #f8fafc;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text2: #64748b;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    color: white; padding: 18px 28px; display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 14px;
+    box-shadow: 0 4px 20px rgba(37,99,235,0.3);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo-circle {
+    width: 46px; height: 46px; background: rgba(255,255,255,0.25);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; border: 2px solid rgba(255,255,255,0.5);
+    flex-shrink: 0;
+  }
+  .header-title h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px; }
+  .header-title p { font-size: 0.78rem; opacity: 0.85; margin-top: 1px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-header {
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35);
+    color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 0.85rem; font-weight: 600; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-header:hover { background: rgba(255,255,255,0.3); }
+
+  /* SEARCH BAR */
+  .search-bar-container {
+    background: var(--surface); padding: 18px 28px;
+    border-bottom: 1px solid var(--border); position: sticky; top: 82px; z-index: 90;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .search-wrapper { position: relative; max-width: 600px; }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--text2); font-size: 18px; pointer-events: none;
+  }
+  #searchInput {
+    width: 100%; padding: 12px 14px 12px 44px; border: 2px solid var(--border);
+    border-radius: 10px; font-size: 1rem; color: var(--text);
+    background: var(--bg); transition: all 0.2s; outline: none;
+  }
+  #searchInput:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  #searchInput::placeholder { color: var(--text2); }
+  .search-clear {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--text2);
+    font-size: 18px; display: none; padding: 4px;
+  }
+  .search-result-count {
+    font-size: 0.82rem; color: var(--text2); margin-top: 6px; height: 18px;
+  }
+
+  /* STATS */
+  .stats-bar { display: flex; gap: 14px; padding: 16px 28px; flex-wrap: wrap; }
+  .stat-card {
+    background: var(--surface); border-radius: var(--radius); padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px; flex: 1; min-width: 140px;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+  }
+  .stat-icon { font-size: 24px; }
+  .stat-info .stat-value { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+  .stat-info .stat-label { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+  .stat-blue .stat-value { color: var(--primary); }
+  .stat-green .stat-value { color: var(--success); }
+  .stat-red .stat-value { color: var(--danger); }
+  .stat-orange .stat-value { color: var(--warning); }
+
+  /* CONTENT */
+  .content { padding: 0 28px 28px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-top: 16px; }
+  .section-title { font-size: 1rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .view-toggle { display: flex; gap: 6px; }
+  .view-btn {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 10px; cursor: pointer; font-size: 16px; transition: all 0.15s;
+  }
+  .view-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+  /* PRODUCT GRID */
+  #productGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  #productGrid.list-view { grid-template-columns: 1fr; }
+
+  /* PRODUCT CARD */
+  .product-card {
+    background: var(--surface); border-radius: var(--radius); overflow: hidden;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+    transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column;
+  }
+  .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+
+  .product-image-container {
+    position: relative; height: 150px; background: var(--bg);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .product-image-container img { width: 100%; height: 100%; object-fit: cover; }
+  .product-img-placeholder {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 100%; height: 100%; color: var(--text2); gap: 6px;
+  }
+  .product-img-placeholder .ph-icon { font-size: 36px; opacity: 0.4; }
+  .product-img-placeholder span { font-size: 0.72rem; opacity: 0.6; }
+  .img-upload-btn {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(37,99,235,0.9); color: white; border: none; border-radius: 50%;
+    width: 32px; height: 32px; font-size: 14px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .img-upload-btn:hover { background: var(--primary-dark); transform: scale(1.1); }
+  .stock-badge {
+    position: absolute; top: 8px; left: 8px; padding: 3px 9px; border-radius: 20px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.3px;
+  }
+  .badge-ok { background: #dcfce7; color: #15803d; }
+  .badge-low { background: #fef9c3; color: #a16207; }
+  .badge-out { background: #fee2e2; color: #dc2626; }
+
+  .product-info { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; }
+  .product-name { font-size: 0.9rem; font-weight: 700; line-height: 1.3; color: var(--text); margin-bottom: 6px; }
+  .product-meta { font-size: 0.75rem; color: var(--text2); display: flex; flex-direction: column; gap: 2px; margin-top: auto; }
+  .product-meta span { display: flex; align-items: center; gap: 5px; }
+  .product-stock-row {
+    display: flex; align-items: center; justify-content: space-between; margin-top: 10px;
+    padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  .stock-number { font-size: 1.1rem; font-weight: 800; }
+  .stock-ok { color: var(--success); }
+  .stock-low { color: var(--warning); }
+  .stock-out { color: var(--danger); }
+  .stock-label { font-size: 0.7rem; color: var(--text2); text-align: right; line-height: 1.2; }
+
+  /* LIST VIEW */
+  #productGrid.list-view .product-card {
+    flex-direction: row; align-items: stretch; height: 90px;
+  }
+  #productGrid.list-view .product-image-container { width: 90px; height: 90px; flex-shrink: 0; border-radius: 0; }
+  #productGrid.list-view .product-info { flex-direction: row; align-items: center; padding: 10px 16px; gap: 16px; }
+  #productGrid.list-view .product-name { font-size: 0.85rem; flex: 2; margin-bottom: 0; }
+  #productGrid.list-view .product-meta { flex: 2; gap: 1px; }
+  #productGrid.list-view .product-stock-row { flex: 0 0 auto; margin-top: 0; padding-top: 0; border-top: none; flex-direction: column; align-items: center; }
+
+  /* NO RESULTS */
+  .no-results {
+    grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+    color: var(--text2);
+  }
+  .no-results .nr-icon { font-size: 56px; margin-bottom: 14px; opacity: 0.4; }
+  .no-results h3 { font-size: 1.1rem; margin-bottom: 6px; }
+  .no-results p { font-size: 0.85rem; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 1000;
+    align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--surface); border-radius: 16px; max-width: 680px; width: 100%;
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 22px 24px 0; gap: 16px;
+  }
+  .modal-close {
+    background: var(--bg); border: none; cursor: pointer; border-radius: 50%;
+    width: 36px; height: 36px; font-size: 20px; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; color: var(--text2); transition: all 0.15s;
+  }
+  .modal-close:hover { background: #fee2e2; color: var(--danger); }
+  .modal-product-name { font-size: 1.25rem; font-weight: 800; line-height: 1.3; }
+  .modal-body { padding: 18px 24px 24px; }
+
+  .modal-image-area {
+    display: flex; gap: 18px; align-items: flex-start; margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .modal-img-box {
+    position: relative; width: 160px; height: 160px; flex-shrink: 0;
+    border-radius: 12px; overflow: hidden; border: 2px solid var(--border);
+    background: var(--bg); cursor: pointer;
+  }
+  .modal-img-box img { width: 100%; height: 100%; object-fit: cover; }
+  .modal-img-placeholder {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px; color: var(--text2);
+  }
+  .modal-img-overlay {
+    position: absolute; inset: 0; background: rgba(37,99,235,0.7);
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    gap: 6px; color: white; font-size: 0.8rem; font-weight: 600; opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .modal-img-box:hover .modal-img-overlay { opacity: 1; }
+  .modal-img-overlay .overlay-icon { font-size: 28px; }
+
+  .modal-img-info { flex: 1; min-width: 200px; }
+  .modal-img-info h4 { font-size: 0.85rem; font-weight: 700; color: var(--text2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .img-action-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .img-btn {
+    padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 0.82rem; font-weight: 600; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+  }
+  .img-btn-primary { background: var(--primary); color: white; }
+  .img-btn-primary:hover { background: var(--primary-dark); }
+  .img-btn-danger { background: #fee2e2; color: var(--danger); }
+  .img-btn-danger:hover { background: #fecaca; }
+
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  .info-item { display: flex; flex-direction: column; gap: 3px; }
+  .info-label { font-size: 0.72rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-value { font-size: 0.92rem; font-weight: 600; color: var(--text); }
+  .info-value.empty { color: #cbd5e1; font-style: italic; font-weight: 400; }
+
+  .stock-display {
+    background: var(--bg); border-radius: 10px; padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
+    border: 1px solid var(--border);
+  }
+  .stock-big { font-size: 2.5rem; font-weight: 900; line-height: 1; }
+  .stock-details { text-align: right; }
+  .stock-details .sd-row { font-size: 0.82rem; color: var(--text2); display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .sd-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-in { background: var(--success); }
+  .dot-out { background: var(--danger); }
+
+  .edit-section { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 18px; }
+  .edit-section h4 { font-size: 0.85rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .edit-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .edit-input-group { flex: 1; min-width: 120px; }
+  .edit-input-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text2); margin-bottom: 4px; }
+  .edit-input-group input, .edit-input-group textarea {
+    width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 0.88rem; color: var(--text); background: var(--surface2); outline: none;
+    transition: border-color 0.15s; font-family: inherit;
+  }
+  .edit-input-group input:focus, .edit-input-group textarea:focus { border-color: var(--primary); background: white; }
+  .edit-input-group textarea { resize: vertical; min-height: 60px; }
+  .edit-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+  .btn-save {
+    background: var(--primary); color: white; border: none; padding: 10px 22px;
+    border-radius: 9px; cursor: pointer; font-size: 0.88rem; font-weight: 700; transition: all 0.15s;
+  }
+  .btn-save:hover { background: var(--primary-dark); }
+  .btn-cancel-edit {
+    background: var(--bg); color: var(--text2); border: 1px solid var(--border);
+    padding: 10px 18px; border-radius: 9px; cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all 0.15s;
+  }
+  .btn-cancel-edit:hover { background: var(--border); }
+
+  /* ADD PRODUCT MODAL */
+  .add-modal {
+    background: var(--surface); border-radius: 16px; max-width: 580px; width: 100%;
+    max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.25s ease;
+  }
+  .add-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .add-form-full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 0.75rem; font-weight: 700; color: var(--text2); text-transform: uppercase; }
+  .form-group input, .form-group textarea {
+    padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 0.88rem; color: var(--text); outline: none; transition: border-color 0.15s; font-family: inherit;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+  .add-form-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white;
+    padding: 12px 20px; border-radius: 10px; font-size: 0.88rem; font-weight: 600;
+    z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s;
+    display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow-lg);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+
+  /* Hidden file input */
+  #fileInput { display: none; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .header { padding: 14px 16px; }
+    .search-bar-container { padding: 14px 16px; }
+    .stats-bar { padding: 12px 16px; gap: 10px; }
+    .content { padding: 0 16px 20px; }
+    .info-grid { grid-template-columns: 1fr; }
+    .add-form-grid { grid-template-columns: 1fr; }
+    #productGrid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .orders-panel { padding: 0 16px 4px; }
+    .orders-add-row { flex-direction: column; }
+  }
+
+  /* ===== ORDERS PANEL ===== */
+  .orders-panel { padding: 0 28px 6px; }
+  .orders-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 13px 18px; cursor: pointer; user-select: none;
+    box-shadow: var(--shadow); transition: all 0.2s;
+  }
+  .orders-header:hover { border-color: var(--primary); background: #f0f7ff; }
+  .orders-header.expanded { border-radius: var(--radius) var(--radius) 0 0; border-bottom-color: transparent; }
+  .orders-header-left { display: flex; align-items: center; gap: 10px; }
+  .orders-header-title { font-weight: 700; font-size: 0.95rem; }
+  .orders-count-badge {
+    background: var(--primary); color: white; border-radius: 20px;
+    padding: 2px 9px; font-size: 0.72rem; font-weight: 700; min-width: 24px; text-align: center;
+  }
+  .orders-toggle { font-size: 0.75rem; color: var(--text2); transition: transform 0.25s; line-height: 1; }
+  .orders-toggle.open { transform: rotate(180deg); }
+  .orders-body {
+    background: var(--surface); border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius); padding: 16px 18px;
+    display: none; box-shadow: var(--shadow);
+  }
+  .orders-body.open { display: block; animation: fadeIn 0.18s ease; }
+  .orders-add-row {
+    display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+    padding-bottom: 14px; border-bottom: 1px solid var(--border);
+  }
+  .orders-add-row input, .orders-add-row select {
+    padding: 8px 11px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 0.84rem; outline: none; transition: border-color 0.15s; font-family: inherit;
+    color: var(--text); background: var(--surface2);
+  }
+  .orders-add-row input:focus, .orders-add-row select:focus { border-color: var(--primary); background: white; }
+  .inp-titulo { flex: 2; min-width: 150px; }
+  .inp-desc { flex: 3; min-width: 180px; }
+  .btn-add-order {
+    background: var(--primary); color: white; border: none; border-radius: 8px;
+    padding: 8px 16px; cursor: pointer; font-size: 0.84rem; font-weight: 700;
+    white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+  }
+  .btn-add-order:hover { background: var(--primary-dark); }
+  .orders-list { display: flex; flex-direction: column; gap: 8px; }
+  .order-item {
+    display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px;
+    border-radius: 9px; border: 1px solid var(--border); background: var(--surface2);
+    transition: all 0.15s;
+  }
+  .order-item:hover { border-color: #93c5fd; background: #eff6ff; }
+  .order-prio-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .prio-alta { background: #dc2626; }
+  .prio-media { background: #d97706; }
+  .prio-baja { background: #16a34a; }
+  .order-content { flex: 1; min-width: 0; }
+  .order-title-text { font-weight: 700; font-size: 0.88rem; }
+  .order-desc-text { font-size: 0.8rem; color: var(--text2); margin-top: 2px; word-break: break-word; }
+  .order-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .order-status-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
+  .status-pendiente { background: #fef9c3; color: #a16207; }
+  .status-proceso { background: #dbeafe; color: #1d4ed8; }
+  .status-completado { background: #dcfce7; color: #15803d; }
+  .order-date-text { font-size: 0.72rem; color: #94a3b8; }
+  .order-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+  .order-status-sel {
+    font-size: 0.75rem; padding: 4px 7px; border: 1px solid var(--border);
+    border-radius: 7px; cursor: pointer; outline: none; background: var(--surface);
+    color: var(--text); font-family: inherit;
+  }
+  .order-act-btn {
+    background: none; border: none; cursor: pointer; border-radius: 6px;
+    padding: 4px 8px; font-size: 14px; color: var(--text2); transition: all 0.15s;
+  }
+  .order-act-btn.del:hover { background: #fee2e2; color: var(--danger); }
+  .orders-empty { text-align: center; padding: 24px 16px; color: var(--text2); font-size: 0.85rem; }
+
+  /* ===== GUIDE CARDS ===== */
+  .guide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+  .guide-card {
+    display: flex; gap: 14px; padding: 14px 16px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    transition: all 0.15s;
+  }
+  .guide-card:hover { border-color: #93c5fd; background: #eff6ff; }
+  .guide-icon { font-size: 26px; flex-shrink: 0; line-height: 1.3; }
+  .guide-content { flex: 1; min-width: 0; }
+  .guide-title { font-weight: 700; font-size: 0.88rem; margin-bottom: 5px; color: var(--text); }
+  .guide-text { font-size: 0.8rem; color: var(--text2); line-height: 1.55; }
+
+  /* ===== CONFIRM DIALOG ===== */
+  .confirm-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 2000;
+    align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .confirm-overlay.open { display: flex; animation: fadeIn 0.15s ease; }
+  .confirm-box {
+    background: var(--surface); border-radius: 16px; padding: 30px 28px 22px;
+    max-width: 360px; width: 100%; box-shadow: var(--shadow-lg); text-align: center;
+    animation: slideUp 0.2s ease;
+  }
+  .confirm-icon { font-size: 46px; margin-bottom: 12px; }
+  .confirm-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 8px; }
+  .confirm-msg { font-size: 0.85rem; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+  .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+  .btn-confirm-cancel {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text2);
+    padding: 10px 22px; border-radius: 9px; cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all 0.15s;
+  }
+  .btn-confirm-cancel:hover { background: var(--border); }
+  .btn-confirm-delete {
+    background: var(--danger); color: white; border: none;
+    padding: 10px 22px; border-radius: 9px; cursor: pointer; font-size: 0.88rem; font-weight: 700; transition: all 0.15s;
+  }
+  .btn-confirm-delete:hover { background: #b91c1c; }
+  .btn-delete-product {
+    background: #fee2e2; color: var(--danger); border: 1px solid #fecaca;
+    padding: 10px 18px; border-radius: 9px; cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all 0.15s;
+  }
+  .btn-delete-product:hover { background: #fecaca; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-circle">AJ</div>
+    <div class="header-title">
+      <h1>Control de Inventario</h1>
+      <p>A J Soluciones S.A.</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-header" id="btnGuardar" onclick="saveAsFile()">💾 Guardar archivo</button>
+    <button class="btn-header" onclick="openAddModal()">＋ Agregar Producto</button>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-bar-container">
+  <div class="search-wrapper">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar producto por nombre, fabricante, catálogo..." oninput="handleSearch(this.value)">
+    <button class="search-clear" id="clearSearch" onclick="clearSearchFn()">✕</button>
+  </div>
+  <div class="search-result-count" id="searchResultCount"></div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar" id="statsBar"></div>
+
+<!-- GUIDE PANEL -->
+<div class="orders-panel">
+  <div class="orders-header" id="ordersHeader" onclick="toggleOrders()">
+    <div class="orders-header-left">
+      <span>📖</span>
+      <span class="orders-header-title">¿Cómo usar este sistema?</span>
+      <span class="orders-count-badge" style="background:var(--accent)">Guía rápida</span>
+    </div>
+    <span class="orders-toggle" id="ordersToggle">▼</span>
+  </div>
+  <div class="orders-body" id="ordersBody">
+    <div class="guide-grid">
+
+      <div class="guide-card">
+        <div class="guide-icon">🔍</div>
+        <div class="guide-content">
+          <div class="guide-title">Buscar un producto</div>
+          <div class="guide-text">Escribe el nombre, fabricante o número de catálogo en la barra de búsqueda. El sistema mostrará <strong>todos los productos que coincidan</strong> en tiempo real, resaltando el término en amarillo. Si varios productos comparten el mismo nombre, aparecen todos.</div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-icon">📷</div>
+        <div class="guide-content">
+          <div class="guide-title">Asignar o cambiar imagen</div>
+          <div class="guide-text">Haz clic en el ícono 📷 sobre la tarjeta del producto, o ábrelo y usa el botón <strong>"Subir / Cambiar"</strong>. La imagen queda guardada automáticamente. También puedes eliminarla con el botón rojo que aparece cuando ya hay una foto asignada.</div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-icon">✏️</div>
+        <div class="guide-content">
+          <div class="guide-title">Editar un producto</div>
+          <div class="guide-text">Haz clic en cualquier tarjeta para abrirla. Desplázate hasta la sección <strong>"Actualizar Datos"</strong>, modifica los campos que necesites (nombre, entradas, salidas, fabricante, etc.) y presiona <strong>"Guardar Cambios"</strong>.</div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-icon">➕</div>
+        <div class="guide-content">
+          <div class="guide-title">Agregar un producto nuevo</div>
+          <div class="guide-text">Usa el botón <strong>"＋ Agregar Producto"</strong> en la esquina superior derecha del encabezado. Completa el formulario — solo el nombre es obligatorio — y presiona <strong>"Guardar Producto"</strong>. El nuevo producto aparece de inmediato en el listado.</div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-icon">📦</div>
+        <div class="guide-content">
+          <div class="guide-title">Controlar el stock</div>
+          <div class="guide-text">Cada producto tiene campos de <strong>Entradas</strong> y <strong>Salidas</strong>; el stock se calcula automáticamente. El color de la tarjeta indica el estado: <span style="color:#15803d;font-weight:700">verde</span> = en stock, <span style="color:#a16207;font-weight:700">amarillo</span> = stock bajo (≤ 2 unidades), <span style="color:#dc2626;font-weight:700">rojo</span> = agotado.</div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-icon">🗑️</div>
+        <div class="guide-content">
+          <div class="guide-title">Eliminar un producto</div>
+          <div class="guide-text">Abre el producto haciendo clic en su tarjeta, desplázate hasta la sección de edición y presiona el botón <strong>"Eliminar"</strong> (en rojo). El sistema pedirá confirmación antes de borrarlo. Esta acción <strong>no se puede deshacer</strong>.</div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-icon">▦</div>
+        <div class="guide-content">
+          <div class="guide-title">Cambiar la vista</div>
+          <div class="guide-text">Usa los botones <strong>▦ / ☰</strong> (arriba a la derecha del listado) para alternar entre vista de <strong>cuadrícula</strong> (tarjetas con imagen) y vista de <strong>lista</strong> (filas compactas). Ambas vistas muestran el stock y permiten abrir el detalle de cada producto.</div>
+        </div>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-icon">💾</div>
+        <div class="guide-content">
+          <div class="guide-title">Guardar cambios (Dropbox u otro)</div>
+          <div class="guide-text">Al terminar de editar, haz clic en <strong>"💾 Guardar archivo"</strong>. Se descarga una nueva versión del HTML con todos los cambios ya incluidos. <strong>Sube ese archivo a Dropbox</strong> reemplazando el anterior. La próxima vez que lo abras, tendrá todos los datos actualizados — sin depender del navegador.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div class="section-header">
+    <span class="section-title" id="sectionTitle">Todos los Productos</span>
+    <div class="view-toggle">
+      <button class="view-btn active" id="gridBtn" onclick="setView('grid')" title="Vista cuadrícula">▦</button>
+      <button class="view-btn" id="listBtn" onclick="setView('list')" title="Vista lista">☰</button>
+    </div>
+  </div>
+  <div id="productGrid"></div>
+</div>
+
+<!-- PRODUCT DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" onclick="closeDetailModal(event)">
+  <div class="modal" id="modalContent">
+    <div class="modal-header">
+      <div class="modal-product-name" id="modalTitle"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ADD PRODUCT MODAL -->
+<div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
+  <div class="add-modal">
+    <div class="modal-header">
+      <div class="modal-product-name">Agregar Nuevo Producto</div>
+      <button class="modal-close" onclick="document.getElementById('addModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="add-form-grid">
+        <div class="form-group">
+          <label>Nombre del Producto *</label>
+          <input type="text" id="new_producto" placeholder="Nombre completo">
+        </div>
+        <div class="form-group">
+          <label>Ubicación</label>
+          <input type="text" id="new_ubicacion" placeholder="Ej: ESTANTE, GAVETA">
+        </div>
+        <div class="form-group">
+          <label>Fabricante</label>
+          <input type="text" id="new_fabricante" placeholder="Nombre del fabricante">
+        </div>
+        <div class="form-group">
+          <label>No. Catálogo</label>
+          <input type="text" id="new_catalogo" placeholder="Número de catálogo">
+        </div>
+        <div class="form-group">
+          <label>Presentación</label>
+          <input type="text" id="new_presentacion" placeholder="Ej: UNIDAD, 100 G">
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="new_fecha">
+        </div>
+        <div class="form-group">
+          <label>Entrada</label>
+          <input type="number" id="new_entrada" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Salida</label>
+          <input type="number" id="new_salida" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Entregado A</label>
+          <input type="text" id="new_entregado" placeholder="Nombre de persona">
+        </div>
+        <div class="form-group add-form-full">
+          <label>Observaciones</label>
+          <textarea id="new_obs" placeholder="Notas adicionales..." rows="2"></textarea>
+        </div>
+      </div>
+      <div class="add-form-btns">
+        <button class="btn-cancel-edit" onclick="document.getElementById('addModal').classList.remove('open')">Cancelar</button>
+        <button class="btn-save" onclick="saveNewProduct()">💾 Guardar Producto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE DIALOG -->
+<div class="confirm-overlay" id="confirmOverlay" onclick="closeConfirm(event)">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title" id="confirmTitle">¿Eliminar?</div>
+    <div class="confirm-msg" id="confirmMsg">Esta acción no se puede deshacer.</div>
+    <div class="confirm-btns">
+      <button class="btn-confirm-cancel" onclick="closeConfirmBox()">Cancelar</button>
+      <button class="btn-confirm-delete" id="confirmActionBtn">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
+<input type="file" id="importFileInput" accept=".json,.txt,application/json,text/plain,text/*" onchange="handleImportFile(event)">
+
+<script>
+// ===================== DATA =====================
+const STORAGE_KEY = 'inventario_aj_v2';
+const IMAGES_KEY = 'inventario_images_v2';
+
+const SAVED_PRODUCTS = /*PDATA*/[
+  { id:1, fecha:"2025-01-03", producto:"HOJAS DE BISTURÍ # 22", ubicacion:"GAVETA", fabricante:"", catalogo:"", presentacion:"CAJAS 100 U", entrada:3, salida:0, entregado:"", obs:"" },
+  { id:2, fecha:"2024-09-19", producto:"ACEITE DE CALENDULA", ubicacion:"ESTANTE", fabricante:"NAISSANCE", catalogo:"", presentacion:"8 ONZ", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:3, fecha:"2025-07-27", producto:"ACEITE FRACCIONADO DE COCO", ubicacion:"ESTANTE", fabricante:"NAISSANCE", catalogo:"", presentacion:"8 ONZ", entrada:2, salida:0, entregado:"", obs:"" },
+  { id:4, fecha:"2026-01-06", producto:"AGAR", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"A1000", presentacion:"1 KG", entrada:3, salida:0, entregado:"", obs:"" },
+  { id:5, fecha:"2024-09-19", producto:"ESPATULA ACANALADA", ubicacion:"GAVETA", fabricante:"", catalogo:"", presentacion:"UNIDAD", entrada:3, salida:0, entregado:"", obs:"" },
+  { id:6, fecha:"2024-09-19", producto:"MANGO DE BISTURI #4", ubicacion:"GAVETA", fabricante:"", catalogo:"", presentacion:"UNIDAD", entrada:6, salida:0, entregado:"", obs:"" },
+  { id:7, fecha:"2024-09-19", producto:"NAVAJAS MICROTOMO 0.009/0.2286 MM UN SOLO FILO", ubicacion:"GAVETA", fabricante:"AMERICAN LINE", catalogo:"", presentacion:"CAJA 100 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:8, fecha:"2024-09-19", producto:"PAPEL FILTRO ⏀70 MM", ubicacion:"GAVETA", fabricante:"WHATMAN", catalogo:"1001-070", presentacion:"CAJA 100 U", entrada:3, salida:0, entregado:"", obs:"" },
+  { id:9, fecha:"2024-09-19", producto:"PASTILLA AGITADOR MAGNETICO 2.5 X 6 MM", ubicacion:"GAVETA", fabricante:"SIPINPAK", catalogo:"37790-0000", presentacion:"UNIDAD", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:10, fecha:"2024-09-19", producto:"PASTILLA AGITADOR MAGNETICO 20 X 6 MM", ubicacion:"GAVETA", fabricante:"THOMAS CIENTIFIC", catalogo:"1197K32", presentacion:"UNIDAD", entrada:7, salida:0, entregado:"", obs:"" },
+  { id:11, fecha:"2024-09-19", producto:"PINZA CURVA 12 CM", ubicacion:"GAVETA", fabricante:"", catalogo:"", presentacion:"UNIDAD", entrada:19, salida:3, entregado:"", obs:"" },
+  { id:12, fecha:"2024-09-19", producto:"PINZA CURVA 17 CM", ubicacion:"GAVETA", fabricante:"", catalogo:"", presentacion:"UNIDAD", entrada:3, salida:1, entregado:"", obs:"" },
+  { id:13, fecha:"2025-01-28", producto:"HOJAS DE BISTURÍ # 11", ubicacion:"GAVETA", fabricante:"", catalogo:"", presentacion:"CAJAS 100 U", entrada:5, salida:0, entregado:"", obs:"" },
+  { id:14, fecha:"2026-01-06", producto:"AGAR (PLANTCELL)", ubicacion:"ESTANTE", fabricante:"PLANTCELL", catalogo:"A500", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:15, fecha:"2025-07-27", producto:"AGAR A (BIO BASIC)", ubicacion:"ESTANTE", fabricante:"BIO BASIC", catalogo:"FB0010", presentacion:"100 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:16, fecha:"2025-11-27", producto:"AGAR A TECHNICAL GRADE-GRACILARIA", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"A 1000", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:17, fecha:"2024-09-19", producto:"AGAROSA BASICA", ubicacion:"ESTANTE", fabricante:"IBI SCIENTIFIC", catalogo:"IB70070", presentacion:"100 G", entrada:2, salida:1, entregado:"", obs:"" },
+  { id:18, fecha:"2025-07-27", producto:"AMMONIUM CHLORIDE ACS", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"A109", presentacion:"100 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:19, fecha:"2025-07-27", producto:"ARETES PARA OVEJA", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"PAQUETE", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:20, fecha:"2025-07-27", producto:"BOTELLA AMBAR TAPA AZUL 50 ML", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDADES", entrada:4, salida:0, entregado:"", obs:"" },
+  { id:21, fecha:"2025-10-01", producto:"BURETTE STRAIGHT STOPCOCK PTFE 10 ML", ubicacion:"ESTANTE", fabricante:"", catalogo:"BOE5256719", presentacion:"UNIDADES", entrada:2, salida:0, entregado:"", obs:"" },
+  { id:22, fecha:"2025-10-21", producto:"CALCIUM CHLORIDE", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"C266", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:23, fecha:"2025-07-27", producto:"CHLORHEXIDINE", ubicacion:"ESTANTE", fabricante:"GOLDBIO", catalogo:"CAS:55-56-1", presentacion:"1 G", entrada:2, salida:0, entregado:"", obs:"" },
+  { id:24, fecha:"2025-10-01", producto:"COBALT CHLORIDE", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"C350", presentacion:"25 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:25, fecha:"2025-11-27", producto:"COBALT SULFATE HEPTAHYDRATE", ubicacion:"ESTANTE", fabricante:"CHEMSAVERS", catalogo:"10026-24-1", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:26, fecha:"2025-07-27", producto:"COLLECTION TUBE (ADN)", ubicacion:"ESTANTE", fabricante:"BIO BASIC", catalogo:"", presentacion:"PAQUETE 100 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:27, fecha:"2025-07-27", producto:"CUPRIC SULFATE", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"C 375", presentacion:"UNIDAD", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:28, fecha:"2025-10-21", producto:"CUPRIC SULFATE PENTAHYDRATE", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"C375", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:29, fecha:"2024-09-19", producto:"CYLINDER MEASURING GRADUATED 10 ML", ubicacion:"ESTANTE", fabricante:"EISCO", catalogo:"CH0341-A-BL", presentacion:"UNIDAD", entrada:3, salida:0, entregado:"", obs:"" },
+  { id:30, fecha:"2025-07-27", producto:"PINZA RECTA PUNTA ROMA", ubicacion:"GAVETA", fabricante:"FOCMKEAS", catalogo:"X003T6KTNV", presentacion:"PAQ 5 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:31, fecha:"2025-07-27", producto:"D-ARABIDOSA", ubicacion:"ESTANTE", fabricante:"BIO BASIC", catalogo:"AB0071D", presentacion:"100 G", entrada:3, salida:0, entregado:"", obs:"" },
+  { id:32, fecha:"2025-09-09", producto:"ESPATULA SEMI MICRO ARROW 20 CM", ubicacion:"ESTANTE", fabricante:"EISCO", catalogo:"PKG BA07031", presentacion:"PAQUETE 10 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:33, fecha:"2025-11-27", producto:"GELZAM CM (500 G)", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"G 3251", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:34, fecha:"2026-01-06", producto:"GELZAM CM (100 G)", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"G 3251", presentacion:"100 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:35, fecha:"2025-07-27", producto:"HOJAS DE BISTURI # 10", ubicacion:"GAVETA", fabricante:"MYMED", catalogo:"", presentacion:"CAJA", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:36, fecha:"2025-07-27", producto:"HORIZONTAL STAINLESS STEEL BAR 8 IN (20.3CM)", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"IEA", presentacion:"UNIDAD", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:37, fecha:"2025-07-27", producto:"KIMWIPES (PAÑOS PARA TAREAS DELICADAS)", ubicacion:"ESTANTE", fabricante:"KIMBERLY-CLARK", catalogo:"", presentacion:"CAJAS 286 U", entrada:2, salida:0, entregado:"", obs:"" },
+  { id:38, fecha:"2025-07-27", producto:"L-CISTEINA HIDROCLORIDE MONOHIDRATE", ubicacion:"ESTANTE", fabricante:"BIO BASIC", catalogo:"CB0133", presentacion:"100 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:39, fecha:"2025-07-27", producto:"PAPEL FILTRO ⏀125 MM", ubicacion:"ESTANTE", fabricante:"CYTIVA", catalogo:"", presentacion:"CAJAS 100 U", entrada:2, salida:2, entregado:"", obs:"" },
+  { id:40, fecha:"2025-07-27", producto:"PESCADOR 18 PULGADAS", ubicacion:"ESTANTE", fabricante:"SP-BEL ART", catalogo:"", presentacion:"UNIDAD", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:41, fecha:"2025-11-27", producto:"PHLOROGLUCINOL", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"P694", presentacion:"25 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:42, fecha:"2025-07-27", producto:"TAPAS MAGENTA VASOS GERBER", ubicacion:"POR EL ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDADES", entrada:643, salida:400, entregado:"", obs:"" },
+  { id:43, fecha:"2025-07-27", producto:"PIPETAS VOLUMETRICAS 10 ML", ubicacion:"ESTANTE", fabricante:"KIMBLE", catalogo:"", presentacion:"UNIDAD", entrada:40, salida:0, entregado:"", obs:"" },
+  { id:44, fecha:"2025-07-27", producto:"PIZETAS AGUA DESTILADA 250 ML", ubicacion:"ESTANTE", fabricante:"H-B INSTRUMENT", catalogo:"118160019", presentacion:"UNIDAD", entrada:4, salida:0, entregado:"", obs:"" },
+  { id:45, fecha:"2025-07-27", producto:"POLY SEAL CAPS 28 MM (EC KRAUS)", ubicacion:"ESTANTE", fabricante:"EC KRAUS", catalogo:"", presentacion:"PAQ 48 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:46, fecha:"2025-07-27", producto:"POLY SEAL CAPS 28 MM (FCKRAUS)", ubicacion:"ESTANTE", fabricante:"FCKRAUS", catalogo:"", presentacion:"PAQ 50 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:47, fecha:"2025-09-09", producto:"ESPATULAS CHATTAWAY 7.9", ubicacion:"GAVETA", fabricante:"", catalogo:"", presentacion:"UNIDADES", entrada:4, salida:1, entregado:"", obs:"" },
+  { id:48, fecha:"2025-07-27", producto:"POLY SEAL PEQUEÑAS (50 U)", ubicacion:"ESTANTE", fabricante:"FCKRAUS", catalogo:"", presentacion:"PAQ 50 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:49, fecha:"2025-07-27", producto:"POLY SEAL PEQUEÑAS (49 U)", ubicacion:"ESTANTE", fabricante:"FCKRAUS", catalogo:"", presentacion:"PAQ 49 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:50, fecha:"2025-09-09", producto:"POTASSIUM HYDROXIDE PELLETS", ubicacion:"ESTANTE", fabricante:"LOBA CHEMIE", catalogo:"", presentacion:"1000 G", entrada:3, salida:0, entregado:"", obs:"" },
+  { id:51, fecha:"2026-01-06", producto:"POTASSIUM NITRATE", ubicacion:"ESTANTE", fabricante:"PHYTOTECH", catalogo:"P100", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:52, fecha:"2026-01-06", producto:"POTASSIUM PHOSPHATE DIBASIC ANHYDROUS", ubicacion:"ESTANTE", fabricante:"BIO BASIC", catalogo:"", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:53, fecha:"2025-07-27", producto:"PROBETA PLASTICA 250 ML", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDAD", entrada:3, salida:0, entregado:"", obs:"" },
+  { id:54, fecha:"2026-01-06", producto:"PROPYLPARABEN", ubicacion:"ESTANTE", fabricante:"HI MEDIA", catalogo:"GRM 1900", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:55, fecha:"2025-07-27", producto:"REMOVEDOR DE PUNTAS BISTURÍ", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDAD", entrada:5, salida:0, entregado:"", obs:"" },
+  { id:56, fecha:"2025-07-27", producto:"SIMMONS CITRATE AGAR", ubicacion:"ESTANTE", fabricante:"HIMEDIA", catalogo:"M099", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:57, fecha:"2025-10-21", producto:"SODIUM ACETATE TRIHYDRATE HI-AR", ubicacion:"ESTANTE", fabricante:"HIMEDIA", catalogo:"GRM4594", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:58, fecha:"2025-10-21", producto:"STERILE SYRINGE FILTERS 0.22 µm", ubicacion:"ESTANTE", fabricante:"BIOMED SOLUTIONS", catalogo:"", presentacion:"100 UNIDADES", entrada:2, salida:0, entregado:"", obs:"" },
+  { id:59, fecha:"2025-07-27", producto:"TAPA MAGENTA CON ROSCA GRANDES", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDADES", entrada:4, salida:0, entregado:"", obs:"" },
+  { id:60, fecha:"2025-07-27", producto:"TAPAS MAGENTA CON FILTRO GRANDES", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDADES", entrada:24, salida:0, entregado:"", obs:"" },
+  { id:61, fecha:"2025-05-25", producto:"THIAMINE MONONITRATE (100 G)", ubicacion:"ESTANTE", fabricante:"SPECTRUM", catalogo:"T1054", presentacion:"100 G", entrada:2, salida:0, entregado:"", obs:"" },
+  { id:62, fecha:"2025-07-27", producto:"THIAMINE MONONITRATE (500 G)", ubicacion:"ESTANTE", fabricante:"SPECTRUM", catalogo:"T1054", presentacion:"500 G", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:63, fecha:"2025-07-27", producto:"TUBOS DE ENSAYO", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"CAJA 25 U", entrada:1, salida:0, entregado:"", obs:"" },
+  { id:64, fecha:"2026-01-06", producto:"TUBOS DE ENSAYO FONDO PLANO", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDADES", entrada:30, salida:0, entregado:"", obs:"" },
+  { id:65, fecha:"2025-07-27", producto:"TUBOS MICROCENTRÍFUGA CONICOS TAPA AZUL 50 ML", ubicacion:"ESTANTE", fabricante:"CAROLINA", catalogo:"LBCT5005", presentacion:"UNIDADES", entrada:500, salida:50, entregado:"", obs:"" },
+  { id:66, fecha:"2025-07-27", producto:"US EXTENDED DRIP TUBE 14/20", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDAD", entrada:2, salida:0, entregado:"", obs:"" }
+]/*EPDATA*/;
+
+const SAVED_IMAGES = /*IDATA*/{}/*EIDATA*/;
+
+// ===================== STATE =====================
+let products = [];
+let images = {};
+let currentView = 'grid';
+let currentSearchTerm = '';
+let activeUploadId = null;
+
+function loadData() {
+  // Los datos embebidos en el archivo son la fuente principal.
+  // localStorage guarda cambios de la sesión actual (por si se cierra sin guardar).
+  try {
+    const session = localStorage.getItem(STORAGE_KEY);
+    products = session ? JSON.parse(session) : JSON.parse(JSON.stringify(SAVED_PRODUCTS));
+  } catch(e) {
+    products = JSON.parse(JSON.stringify(SAVED_PRODUCTS));
+  }
+  try {
+    const sessionImgs = localStorage.getItem(IMAGES_KEY);
+    images = sessionImgs ? JSON.parse(sessionImgs) : JSON.parse(JSON.stringify(SAVED_IMAGES));
+  } catch(e) {
+    images = JSON.parse(JSON.stringify(SAVED_IMAGES));
+  }
+  updateUnsavedIndicator();
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  localStorage.setItem(IMAGES_KEY, JSON.stringify(images));
+  updateUnsavedIndicator();
+}
+
+function updateUnsavedIndicator() {
+  const btn = document.getElementById('btnGuardar');
+  if (!btn) return;
+  const sessionProducts = localStorage.getItem(STORAGE_KEY);
+  const hasUnsaved = sessionProducts && sessionProducts !== JSON.stringify(SAVED_PRODUCTS);
+  btn.style.background = hasUnsaved ? 'rgba(251,191,36,0.35)' : 'rgba(255,255,255,0.18)';
+  btn.title = hasUnsaved ? '⚠️ Hay cambios sin guardar en el archivo' : 'Los datos del archivo están al día';
+}
+
+function getStock(p) { return (p.entrada || 0) - (p.salida || 0); }
+
+function getStockStatus(stock) {
+  if (stock <= 0) return 'out';
+  if (stock <= 2) return 'low';
+  return 'ok';
+}
+
+// ===================== RENDER =====================
+function renderStats() {
+  const total = products.length;
+  const totalStock = products.reduce((s, p) => s + Math.max(0, getStock(p)), 0);
+  const outCount = products.filter(p => getStock(p) <= 0).length;
+  const lowCount = products.filter(p => { const s = getStock(p); return s > 0 && s <= 2; }).length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-card stat-blue"><span class="stat-icon">📦</span><div class="stat-info"><div class="stat-value">${total}</div><div class="stat-label">Total Productos</div></div></div>
+    <div class="stat-card stat-green"><span class="stat-icon">✅</span><div class="stat-info"><div class="stat-value">${totalStock}</div><div class="stat-label">Unidades en Stock</div></div></div>
+    <div class="stat-card stat-orange"><span class="stat-icon">⚠️</span><div class="stat-info"><div class="stat-value">${lowCount}</div><div class="stat-label">Stock Bajo (≤2)</div></div></div>
+    <div class="stat-card stat-red"><span class="stat-icon">🚫</span><div class="stat-info"><div class="stat-value">${outCount}</div><div class="stat-label">Sin Stock</div></div></div>
+  `;
+}
+
+function highlight(text, query) {
+  if (!query) return escHtml(text);
+  const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return escHtml(text).replace(re, '<mark style="background:#fef08a;border-radius:2px;padding:0 1px">$1</mark>');
+}
+
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function getFilteredProducts(query) {
+  if (!query || query.trim() === '') return products;
+  const terms = query.toLowerCase().trim().split(/\s+/);
+  return products.filter(p => {
+    const searchStr = [p.producto, p.fabricante, p.catalogo, p.ubicacion, p.presentacion, p.obs]
+      .join(' ').toLowerCase();
+    return terms.every(t => searchStr.includes(t));
+  });
+}
+
+function renderProducts(query = '') {
+  const filtered = getFilteredProducts(query);
+  const grid = document.getElementById('productGrid');
+  const countEl = document.getElementById('searchResultCount');
+  const titleEl = document.getElementById('sectionTitle');
+
+  if (query) {
+    countEl.textContent = filtered.length === 0
+      ? 'Sin resultados para "' + query + '"'
+      : `${filtered.length} producto${filtered.length !== 1 ? 's' : ''} encontrado${filtered.length !== 1 ? 's' : ''} para "${query}"`;
+    titleEl.textContent = 'Resultados de búsqueda';
+  } else {
+    countEl.textContent = '';
+    titleEl.textContent = 'Todos los Productos';
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="no-results"><div class="nr-icon">🔍</div><h3>Sin resultados</h3><p>No se encontraron productos para "<strong>${escHtml(query)}</strong>".<br>Intenta con otro término.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const stock = getStock(p);
+    const status = getStockStatus(stock);
+    const imgSrc = images[p.id];
+    const badges = { ok: ['badge-ok', 'En stock'], low: ['badge-low', 'Stock bajo'], out: ['badge-out', 'Sin stock'] };
+    const stockColors = { ok: 'stock-ok', low: 'stock-low', out: 'stock-out' };
+
+    const imgHtml = imgSrc
+      ? `<img src="${imgSrc}" alt="${escHtml(p.producto)}">`
+      : `<div class="product-img-placeholder"><span class="ph-icon">🧪</span><span>Sin imagen</span></div>`;
+
+    return `<div class="product-card" onclick="openDetail(${p.id})">
+      <div class="product-image-container">
+        ${imgHtml}
+        <span class="stock-badge ${badges[status][0]}">${badges[status][1]}</span>
+        <button class="img-upload-btn" onclick="event.stopPropagation(); triggerUpload(${p.id})" title="Cambiar imagen">📷</button>
+      </div>
+      <div class="product-info">
+        <div class="product-name">${highlight(p.producto, query)}</div>
+        <div class="product-meta">
+          ${p.fabricante ? `<span>🏭 ${highlight(p.fabricante, query)}</span>` : ''}
+          ${p.catalogo ? `<span>🏷️ ${highlight(p.catalogo, query)}</span>` : ''}
+          <span>📍 ${escHtml(p.ubicacion || '—')}</span>
+        </div>
+        <div class="product-stock-row">
+          <div class="stock-number ${stockColors[status]}">${stock}</div>
+          <div class="stock-label"><span>${escHtml(p.presentacion || '')}</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===================== SEARCH =====================
+function handleSearch(val) {
+  currentSearchTerm = val;
+  document.getElementById('clearSearch').style.display = val ? 'block' : 'none';
+  renderProducts(val.trim());
+}
+
+function clearSearchFn() {
+  document.getElementById('searchInput').value = '';
+  handleSearch('');
+}
+
+// ===================== VIEW =====================
+function setView(v) {
+  currentView = v;
+  const grid = document.getElementById('productGrid');
+  grid.classList.toggle('list-view', v === 'list');
+  document.getElementById('gridBtn').classList.toggle('active', v === 'grid');
+  document.getElementById('listBtn').classList.toggle('active', v === 'list');
+}
+
+// ===================== DETAIL MODAL =====================
+function openDetail(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const stock = getStock(p);
+  const status = getStockStatus(stock);
+  const imgSrc = images[p.id];
+  const stockColors = { ok: 'stock-ok', low: 'stock-low', out: 'stock-out' };
+
+  document.getElementById('modalTitle').textContent = p.producto;
+
+  const imgHtml = imgSrc
+    ? `<img src="${imgSrc}" alt="${escHtml(p.producto)}">`
+    : `<div class="modal-img-placeholder"><span style="font-size:40px;opacity:.4">🧪</span><span style="font-size:.75rem;color:var(--text2)">Sin imagen</span></div>`;
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-image-area">
+      <div class="modal-img-box" onclick="triggerUpload(${p.id})" id="modalImgBox">
+        ${imgHtml}
+        <div class="modal-img-overlay"><span class="overlay-icon">📷</span><span>Cambiar foto</span></div>
+      </div>
+      <div class="modal-img-info">
+        <h4>Imagen del Producto</h4>
+        <p style="font-size:.82rem;color:var(--text2);margin-bottom:12px;line-height:1.5">Haz clic en la imagen o en el botón para asignar o cambiar la foto de este producto.</p>
+        <div class="img-action-btns">
+          <button class="img-btn img-btn-primary" onclick="triggerUpload(${p.id})">📷 Subir / Cambiar</button>
+          ${imgSrc ? `<button class="img-btn img-btn-danger" onclick="removeImage(${p.id})">🗑️ Eliminar</button>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="stock-display">
+      <div>
+        <div style="font-size:.75rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Stock Actual</div>
+        <div class="stock-big ${stockColors[status]}">${stock}</div>
+        <div style="font-size:.8rem;color:var(--text2);margin-top:4px">${escHtml(p.presentacion || '')}</div>
+      </div>
+      <div class="stock-details">
+        <div class="sd-row"><span class="sd-dot dot-in"></span> Entradas: <strong>${p.entrada || 0}</strong></div>
+        <div class="sd-row" style="margin-top:6px"><span class="sd-dot dot-out"></span> Salidas: <strong>${p.salida || 0}</strong></div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item"><div class="info-label">📅 Fecha</div><div class="info-value ${!p.fecha?'empty':''}">${p.fecha || '—'}</div></div>
+      <div class="info-item"><div class="info-label">📍 Ubicación</div><div class="info-value ${!p.ubicacion?'empty':''}">${escHtml(p.ubicacion) || '—'}</div></div>
+      <div class="info-item"><div class="info-label">🏭 Fabricante</div><div class="info-value ${!p.fabricante?'empty':''}">${escHtml(p.fabricante) || 'No especificado'}</div></div>
+      <div class="info-item"><div class="info-label">🏷️ No. Catálogo</div><div class="info-value ${!p.catalogo?'empty':''}">${escHtml(p.catalogo) || 'No especificado'}</div></div>
+      <div class="info-item"><div class="info-label">📏 Presentación</div><div class="info-value ${!p.presentacion?'empty':''}">${escHtml(p.presentacion) || '—'}</div></div>
+      <div class="info-item"><div class="info-label">👤 Entregado a</div><div class="info-value ${!p.entregado?'empty':''}">${escHtml(p.entregado) || 'No especificado'}</div></div>
+      ${p.obs ? `<div class="info-item" style="grid-column:1/-1"><div class="info-label">📝 Observaciones</div><div class="info-value">${escHtml(p.obs)}</div></div>` : ''}
+    </div>
+
+    <div class="edit-section">
+      <h4>✏️ Actualizar Datos</h4>
+      <div class="edit-row">
+        <div class="edit-input-group" style="flex:2;min-width:200px">
+          <label>Nombre del Producto</label>
+          <input type="text" id="edit_name" value="${escHtml(p.producto)}">
+        </div>
+        <div class="edit-input-group">
+          <label>Ubicación</label>
+          <input type="text" id="edit_ubicacion" value="${escHtml(p.ubicacion || '')}">
+        </div>
+      </div>
+      <div class="edit-row" style="margin-top:10px">
+        <div class="edit-input-group">
+          <label>Fabricante</label>
+          <input type="text" id="edit_fabricante" value="${escHtml(p.fabricante || '')}">
+        </div>
+        <div class="edit-input-group">
+          <label>No. Catálogo</label>
+          <input type="text" id="edit_catalogo" value="${escHtml(p.catalogo || '')}">
+        </div>
+        <div class="edit-input-group">
+          <label>Presentación</label>
+          <input type="text" id="edit_presentacion" value="${escHtml(p.presentacion || '')}">
+        </div>
+      </div>
+      <div class="edit-row" style="margin-top:10px">
+        <div class="edit-input-group">
+          <label>Entradas</label>
+          <input type="number" id="edit_entrada" value="${p.entrada || 0}" min="0">
+        </div>
+        <div class="edit-input-group">
+          <label>Salidas</label>
+          <input type="number" id="edit_salida" value="${p.salida || 0}" min="0">
+        </div>
+        <div class="edit-input-group" style="flex:2">
+          <label>Entregado a</label>
+          <input type="text" id="edit_entregado" value="${escHtml(p.entregado || '')}">
+        </div>
+      </div>
+      <div class="edit-row" style="margin-top:10px">
+        <div class="edit-input-group" style="flex:1">
+          <label>Observaciones</label>
+          <textarea id="edit_obs">${escHtml(p.obs || '')}</textarea>
+        </div>
+      </div>
+      <div class="edit-btns">
+        <button class="btn-cancel-edit" onclick="closeModal()">Cancelar</button>
+        <button class="btn-delete-product" onclick="confirmDeleteProduct(${p.id})">🗑️ Eliminar</button>
+        <button class="btn-save" onclick="saveProductEdit(${p.id})">💾 Guardar Cambios</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function saveProductEdit(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  p.producto = document.getElementById('edit_name').value.trim() || p.producto;
+  p.ubicacion = document.getElementById('edit_ubicacion').value.trim();
+  p.fabricante = document.getElementById('edit_fabricante').value.trim();
+  p.catalogo = document.getElementById('edit_catalogo').value.trim();
+  p.presentacion = document.getElementById('edit_presentacion').value.trim();
+  p.entrada = parseInt(document.getElementById('edit_entrada').value) || 0;
+  p.salida = parseInt(document.getElementById('edit_salida').value) || 0;
+  p.entregado = document.getElementById('edit_entregado').value.trim();
+  p.obs = document.getElementById('edit_obs').value.trim();
+  saveData();
+  renderStats();
+  renderProducts(currentSearchTerm);
+  closeModal();
+  showToast('✅ Producto actualizado', 'success');
+}
+
+function closeModal() { document.getElementById('detailModal').classList.remove('open'); }
+function closeDetailModal(e) { if (e.target.id === 'detailModal') closeModal(); }
+
+// ===================== IMAGE HANDLING =====================
+function triggerUpload(id) {
+  activeUploadId = id;
+  document.getElementById('fileInput').click();
+}
+
+function handleImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file || !activeUploadId) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    images[activeUploadId] = ev.target.result;
+    saveData();
+    renderProducts(currentSearchTerm);
+    if (document.getElementById('detailModal').classList.contains('open')) {
+      openDetail(activeUploadId);
+    }
+    showToast('🖼️ Imagen asignada correctamente', 'success');
+    e.target.value = '';
+    activeUploadId = null;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage(id) {
+  delete images[id];
+  saveData();
+  renderProducts(currentSearchTerm);
+  openDetail(id);
+  showToast('🗑️ Imagen eliminada', 'success');
+}
+
+// ===================== ADD PRODUCT =====================
+function openAddModal() {
+  document.getElementById('addModal').classList.add('open');
+  ['producto','ubicacion','fabricante','catalogo','presentacion','fecha','entregado','obs'].forEach(f => {
+    const el = document.getElementById('new_' + f);
+    if (el) el.value = '';
+  });
+  document.getElementById('new_entrada').value = '';
+  document.getElementById('new_salida').value = '';
+}
+
+function closeAddModal(e) {
+  if (e.target.id === 'addModal') document.getElementById('addModal').classList.remove('open');
+}
+
+function saveNewProduct() {
+  const name = document.getElementById('new_producto').value.trim();
+  if (!name) { showToast('⚠️ El nombre es obligatorio', 'error'); return; }
+  const newId = Math.max(0, ...products.map(p => p.id)) + 1;
+  const newP = {
+    id: newId,
+    fecha: document.getElementById('new_fecha').value || '',
+    producto: name,
+    ubicacion: document.getElementById('new_ubicacion').value.trim(),
+    fabricante: document.getElementById('new_fabricante').value.trim(),
+    catalogo: document.getElementById('new_catalogo').value.trim(),
+    presentacion: document.getElementById('new_presentacion').value.trim(),
+    entrada: parseInt(document.getElementById('new_entrada').value) || 0,
+    salida: parseInt(document.getElementById('new_salida').value) || 0,
+    entregado: document.getElementById('new_entregado').value.trim(),
+    obs: document.getElementById('new_obs').value.trim()
+  };
+  products.push(newP);
+  saveData();
+  renderStats();
+  renderProducts(currentSearchTerm);
+  document.getElementById('addModal').classList.remove('open');
+  showToast('✅ Producto agregado exitosamente', 'success');
+}
+
+// ===================== DELETE PRODUCT =====================
+function confirmDeleteProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('confirmTitle').textContent = '¿Eliminar producto?';
+  document.getElementById('confirmMsg').innerHTML = `Se eliminará permanentemente:<br><br><strong>${escHtml(p.producto)}</strong>`;
+  document.getElementById('confirmActionBtn').onclick = () => deleteProduct(id);
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+function deleteProduct(id) {
+  products = products.filter(x => x.id !== id);
+  delete images[id];
+  saveData();
+  renderStats();
+  renderProducts(currentSearchTerm);
+  closeModal();
+  closeConfirmBox();
+  showToast('🗑️ Producto eliminado', 'success');
+}
+
+function closeConfirmBox() { document.getElementById('confirmOverlay').classList.remove('open'); }
+function closeConfirm(e) { if (e.target.id === 'confirmOverlay') closeConfirmBox(); }
+
+// ===================== GUARDAR ARCHIVO (para Dropbox u otros) =====================
+function saveAsFile() {
+  // Tomar el HTML completo de la página actual
+  let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+  // Reemplazar los datos embebidos con el estado actual
+  html = html.replace(/\/\*PDATA\*\/[\s\S]*?\/\*EPDATA\*\//, '/*PDATA*/' + JSON.stringify(products) + '/*EPDATA*/');
+  html = html.replace(/\/\*IDATA\*\/[\s\S]*?\/\*EIDATA\*\//, '/*IDATA*/' + JSON.stringify(images) + '/*EIDATA*/');
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Inventario_Doña_Vivi.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // Limpiar caché de sesión: el archivo ya tiene los datos
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(IMAGES_KEY);
+  updateUnsavedIndicator();
+  showToast('💾 Archivo guardado. Súbelo a Dropbox para reemplazar el anterior.', 'success');
+}
+
+// ===================== GUIDE PANEL =====================
+function toggleOrders() {
+  const body = document.getElementById('ordersBody');
+  const toggle = document.getElementById('ordersToggle');
+  const header = document.getElementById('ordersHeader');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  toggle.classList.toggle('open', !isOpen);
+  header.classList.toggle('expanded', !isOpen);
+}
+
+// ===================== TOAST =====================
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===================== INIT =====================
+loadData();
+renderStats();
+renderProducts();
+</script>
+</body>
+</html>
