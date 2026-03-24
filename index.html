@@ -460,7 +460,8 @@
     </div>
   </div>
   <div class="header-actions">
-    <button class="btn-header" id="btnGuardar" onclick="saveAsFile()">💾 Guardar archivo</button>
+    <button class="btn-header" onclick="importData()" title="Cargar datos desde archivo .json">📂 Importar</button>
+    <button class="btn-header" onclick="exportData()" title="Guardar todos los datos en un archivo .json">💾 Exportar</button>
     <button class="btn-header" onclick="openAddModal()">＋ Agregar Producto</button>
   </div>
 </div>
@@ -550,8 +551,8 @@
       <div class="guide-card">
         <div class="guide-icon">💾</div>
         <div class="guide-content">
-          <div class="guide-title">Guardar cambios (Dropbox u otro)</div>
-          <div class="guide-text">Al terminar de editar, haz clic en <strong>"💾 Guardar archivo"</strong>. Se descarga una nueva versión del HTML con todos los cambios ya incluidos. <strong>Sube ese archivo a Dropbox</strong> reemplazando el anterior. La próxima vez que lo abras, tendrá todos los datos actualizados — sin depender del navegador.</div>
+          <div class="guide-title">Guardar y respaldar los datos</div>
+          <div class="guide-text">Los cambios se guardan automáticamente en el navegador. Para un respaldo permanente, usa el botón <strong>"💾 Exportar"</strong> (esquina superior derecha) — se descarga un archivo <code>.json</code> con todos los productos e imágenes. Para restaurarlos en cualquier momento o equipo, usa <strong>"📂 Importar"</strong> y selecciona ese archivo.</div>
         </div>
       </div>
 
@@ -663,7 +664,7 @@
 const STORAGE_KEY = 'inventario_aj_v2';
 const IMAGES_KEY = 'inventario_images_v2';
 
-const SAVED_PRODUCTS = /*PDATA*/[
+const DEFAULT_PRODUCTS = [
   { id:1, fecha:"2025-01-03", producto:"HOJAS DE BISTURÍ # 22", ubicacion:"GAVETA", fabricante:"", catalogo:"", presentacion:"CAJAS 100 U", entrada:3, salida:0, entregado:"", obs:"" },
   { id:2, fecha:"2024-09-19", producto:"ACEITE DE CALENDULA", ubicacion:"ESTANTE", fabricante:"NAISSANCE", catalogo:"", presentacion:"8 ONZ", entrada:1, salida:0, entregado:"", obs:"" },
   { id:3, fecha:"2025-07-27", producto:"ACEITE FRACCIONADO DE COCO", ubicacion:"ESTANTE", fabricante:"NAISSANCE", catalogo:"", presentacion:"8 ONZ", entrada:2, salida:0, entregado:"", obs:"" },
@@ -730,9 +731,7 @@ const SAVED_PRODUCTS = /*PDATA*/[
   { id:64, fecha:"2026-01-06", producto:"TUBOS DE ENSAYO FONDO PLANO", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDADES", entrada:30, salida:0, entregado:"", obs:"" },
   { id:65, fecha:"2025-07-27", producto:"TUBOS MICROCENTRÍFUGA CONICOS TAPA AZUL 50 ML", ubicacion:"ESTANTE", fabricante:"CAROLINA", catalogo:"LBCT5005", presentacion:"UNIDADES", entrada:500, salida:50, entregado:"", obs:"" },
   { id:66, fecha:"2025-07-27", producto:"US EXTENDED DRIP TUBE 14/20", ubicacion:"ESTANTE", fabricante:"", catalogo:"", presentacion:"UNIDAD", entrada:2, salida:0, entregado:"", obs:"" }
-]/*EPDATA*/;
-
-const SAVED_IMAGES = /*IDATA*/{}/*EIDATA*/;
+];
 
 // ===================== STATE =====================
 let products = [];
@@ -742,36 +741,15 @@ let currentSearchTerm = '';
 let activeUploadId = null;
 
 function loadData() {
-  // Los datos embebidos en el archivo son la fuente principal.
-  // localStorage guarda cambios de la sesión actual (por si se cierra sin guardar).
-  try {
-    const session = localStorage.getItem(STORAGE_KEY);
-    products = session ? JSON.parse(session) : JSON.parse(JSON.stringify(SAVED_PRODUCTS));
-  } catch(e) {
-    products = JSON.parse(JSON.stringify(SAVED_PRODUCTS));
-  }
-  try {
-    const sessionImgs = localStorage.getItem(IMAGES_KEY);
-    images = sessionImgs ? JSON.parse(sessionImgs) : JSON.parse(JSON.stringify(SAVED_IMAGES));
-  } catch(e) {
-    images = JSON.parse(JSON.stringify(SAVED_IMAGES));
-  }
-  updateUnsavedIndicator();
+  const stored = localStorage.getItem(STORAGE_KEY);
+  products = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+  const storedImgs = localStorage.getItem(IMAGES_KEY);
+  images = storedImgs ? JSON.parse(storedImgs) : {};
 }
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
   localStorage.setItem(IMAGES_KEY, JSON.stringify(images));
-  updateUnsavedIndicator();
-}
-
-function updateUnsavedIndicator() {
-  const btn = document.getElementById('btnGuardar');
-  if (!btn) return;
-  const sessionProducts = localStorage.getItem(STORAGE_KEY);
-  const hasUnsaved = sessionProducts && sessionProducts !== JSON.stringify(SAVED_PRODUCTS);
-  btn.style.background = hasUnsaved ? 'rgba(251,191,36,0.35)' : 'rgba(255,255,255,0.18)';
-  btn.title = hasUnsaved ? '⚠️ Hay cambios sin guardar en el archivo' : 'Los datos del archivo están al día';
 }
 
 function getStock(p) { return (p.entrada || 0) - (p.salida || 0); }
@@ -1119,30 +1097,58 @@ function deleteProduct(id) {
 function closeConfirmBox() { document.getElementById('confirmOverlay').classList.remove('open'); }
 function closeConfirm(e) { if (e.target.id === 'confirmOverlay') closeConfirmBox(); }
 
-// ===================== GUARDAR ARCHIVO (para Dropbox u otros) =====================
-function saveAsFile() {
-  // Tomar el HTML completo de la página actual
-  let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-
-  // Reemplazar los datos embebidos con el estado actual
-  html = html.replace(/\/\*PDATA\*\/[\s\S]*?\/\*EPDATA\*\//, '/*PDATA*/' + JSON.stringify(products) + '/*EPDATA*/');
-  html = html.replace(/\/\*IDATA\*\/[\s\S]*?\/\*EIDATA\*\//, '/*IDATA*/' + JSON.stringify(images) + '/*EIDATA*/');
-
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+// ===================== EXPORT / IMPORT =====================
+function exportData() {
+  const payload = {
+    version: 2,
+    exportDate: new Date().toISOString(),
+    products: products,
+    images: images
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
+  const fecha = new Date().toLocaleDateString('es-CR').replace(/\//g, '-');
   a.href = url;
-  a.download = 'Inventario_Doña_Vivi.html';
+  a.download = `inventario_backup_${fecha}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  showToast('💾 Datos exportados correctamente', 'success');
+}
 
-  // Limpiar caché de sesión: el archivo ya tiene los datos
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(IMAGES_KEY);
-  updateUnsavedIndicator();
-  showToast('💾 Archivo guardado. Súbelo a Dropbox para reemplazar el anterior.', 'success');
+function importData() {
+  document.getElementById('importFileInput').click();
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      let text = ev.target.result;
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      text = text.trim();
+      const data = JSON.parse(text);
+      let parsedProducts = Array.isArray(data) ? data : data.products;
+      if (!Array.isArray(parsedProducts) || parsedProducts.length === 0) {
+        throw new Error('El archivo no contiene productos válidos');
+      }
+      products = parsedProducts;
+      images = (!Array.isArray(data) && data.images) ? data.images : {};
+      saveData();
+      renderStats();
+      renderProducts(currentSearchTerm);
+      showToast(`✅ ${products.length} productos importados correctamente`, 'success');
+    } catch (err) {
+      showToast('❌ No se pudo leer el archivo. Verifica que sea un backup de este sistema.', 'error');
+      console.error('Error al importar:', err.message);
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
 }
 
 // ===================== GUIDE PANEL =====================
